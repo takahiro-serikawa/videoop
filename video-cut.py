@@ -15,6 +15,7 @@ parser.add_argument("-l", "--length", help="output video length; [sec]", type=fl
 parser.add_argument("-s", "--start", help="start time. [sec]", type=float, default=0.0)
 parser.add_argument("-e", "--end", help="end time; [sec]", type=float, default=math.inf)
 parser.add_argument("-r", "--frame-rate", help="change frame rate", type=float)
+parser.add_argument("--crop", help="crop; x,y,width,height")
 parser.add_argument("--alpha", help="", type=float, default=1.0)
 parser.add_argument("--beta", help="", type=float, default=0.0)
 args = parser.parse_args()
@@ -30,12 +31,33 @@ width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = video.get(cv2.CAP_PROP_FPS)
 
+# crop rectangle
+def conv(s, full):
+    if s[-1] == '%':
+        return int(float(s[:-1]) * full / 100)
+    if '.' in s:
+        return int(float(s) * full)
+    return int(s)
+
+cx, cy, cw, ch = (0, 0, width, height)
+if not args.crop is None:
+    cc = args.crop.split(',')
+    if len(cc) > 0:
+        cx = conv(cc[0], width)
+    if len(cc) > 1:
+        cy = conv(cc[1], height)
+    if len(cc) > 2:
+        cw = conv(cc[2], width)
+    if len(cc) > 3:
+        ch = conv(cc[3], height)
+
 # change resolution
 if args.width is None: args.width = width
-scale = args.width/width
-size = (args.width, round(height*scale))
+scale = args.width/cw
+size = (args.width, round(ch*scale))
 
 print(f"{args.video} ({width},{height}) x{scale:.2f} -> {args.output} {size}")
+print(f"crop ({cx},{cy}) ({cw},{ch})")
 
 # make output video
 if args.output is None:
@@ -59,6 +81,7 @@ while video.get(cv2.CAP_PROP_POS_MSEC) < end_msec and msec < length_msec:
     if not ret:
         break
 
+    frame = frame[cy:cy+ch, cx:cx+cw]
     frame = cv2.convertScaleAbs(frame, alpha=args.alpha, beta=args.beta)
     frame = cv2.resize(frame, size)
 
