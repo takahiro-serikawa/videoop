@@ -8,16 +8,16 @@ import cv2
 SUFFIX = '-cut'
 
 parser = argparse.ArgumentParser(description="Edit the video. Change resolutioncut, out for specified time.")
-parser.add_argument("video", help="input video")
-parser.add_argument("-o", f"--output", help="output video; default video{SUFFIX}.mov")
-parser.add_argument("-w", f"--width", help="resize output width; [pixels]", type=int)
-parser.add_argument("-l", "--length", help="output video length; [sec]", type=float, default=math.inf)
-parser.add_argument("-s", "--start", help="start time. [sec]", type=float, default=0.0)
-parser.add_argument("-e", "--end", help="end time; [sec]", type=float, default=math.inf)
-parser.add_argument("-r", "--frame-rate", help="change frame rate", type=float)
-parser.add_argument("--crop", help="crop; x,y,width,height")
-parser.add_argument("--alpha", help="", type=float, default=1.0)
-parser.add_argument("--beta", help="", type=float, default=0.0)
+parser.add_argument("video", help=f"input video")
+parser.add_argument("-o", "--output", help=f"output video; default video{SUFFIX}.mov")
+parser.add_argument("-w", "--width", help=f"resize output width; [pixels]", type=int)
+parser.add_argument("-l", "--length", help=f"output video length; [sec]", type=float, default=math.inf)
+parser.add_argument("-s", "--start", help=f"start time. [sec]", type=float, default=0.0)
+parser.add_argument("-e", "--end", help=f"end time; [sec]", type=float, default=math.inf)
+parser.add_argument("-r", "--frame-rate", help=f"change frame rate", type=float)
+parser.add_argument("--crop", help=f"crop; x,y,width,height")
+parser.add_argument("--alpha", help=f"", type=float, default=1.0)
+parser.add_argument("--beta", help=f"", type=float, default=0.0)
 args = parser.parse_args()
 
 # open source video
