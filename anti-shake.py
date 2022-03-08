@@ -21,7 +21,7 @@ video = cv2.VideoCapture(args.video)
 frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fps = int(video.get(cv2.CAP_PROP_FPS))
+fps = video.get(cv2.CAP_PROP_FPS)
 
 scale = args.width / width
 size = (args.width, round(height * scale))

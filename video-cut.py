@@ -14,6 +14,7 @@ parser.add_argument("-w", f"--width", help="resize output width; [pixels]", type
 parser.add_argument("-l", "--length", help="output video length; [sec]", type=float, default=math.inf)
 parser.add_argument("-s", "--start", help="start time. [sec]", type=float, default=0.0)
 parser.add_argument("-e", "--end", help="end time; [sec]", type=float, default=math.inf)
+parser.add_argument("-r", "--frame-rate", help="change frame rate", type=float)
 parser.add_argument("--alpha", help="", type=float, default=1.0)
 parser.add_argument("--beta", help="", type=float, default=0.0)
 args = parser.parse_args()
@@ -27,19 +28,21 @@ if not video.isOpened():
 frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fps = int(video.get(cv2.CAP_PROP_FPS))
+fps = video.get(cv2.CAP_PROP_FPS)
 
 # change resolution
 if args.width is None: args.width = width
 scale = args.width/width
 size = (args.width, round(height*scale))
 
-print(f"resolution: ({width},{height}) x{scale:.2f} -> {size}")
+print(f"{args.video} ({width},{height}) x{scale:.2f} -> {args.output} {size}")
 
 # make output video
 if args.output is None:
 	root, ext = os.path.splitext(args.video)
 	args.output = root+SUFFIX+ext
+if not args.frame_rate is None:
+    fps = args.frame_rate
 fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
 output = cv2.VideoWriter(args.output, fourcc, fps, size)
 
