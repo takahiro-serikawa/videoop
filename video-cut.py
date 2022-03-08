@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 import os
 import time
+import math
 import argparse
 import cv2
 
 SUFFIX = '-cut'
 
-parser = argparse.ArgumentParser(description="Edit the video. Change resolution.")
+parser = argparse.ArgumentParser(description="Edit the video. Change resolutioncut, out for specified time.")
 parser.add_argument("video", help="input video")
 parser.add_argument("-o", f"--output", help="output video; default video{SUFFIX}.mov")
 parser.add_argument("-w", f"--width", help="resize output width; [pixels]", type=int)
+parser.add_argument("-l", "--length", help="output video length; [sec]", type=float, default=math.inf)
+parser.add_argument("-s", "--start", help="start time. [sec]", type=float, default=0.0)
+parser.add_argument("-e", "--end", help="end time; [sec]", type=float, default=math.inf)
 args = parser.parse_args()
 
 # open source video
@@ -37,8 +41,15 @@ if args.output is None:
 fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
 output = cv2.VideoWriter(args.output, fourcc, fps, size)
 
+# time parameters
+start_msec = args.start * 1000
+end_msec = args.end * 1000
+length_msec = args.length * 1000
+
 perf0 = time.perf_counter()
-while True:
+video.set(cv2.CAP_PROP_POS_MSEC, start_msec)
+msec = 0.0
+while video.get(cv2.CAP_PROP_POS_MSEC) < end_msec and msec < length_msec:
     ret, frame = video.read()
     if not ret:
         break
@@ -46,6 +57,7 @@ while True:
     frame = cv2.resize(frame, size)
 
     output.write(frame)
+    msec += 1000/fps
 
 video.release()
 output.release()
