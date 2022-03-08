@@ -14,6 +14,8 @@ parser.add_argument("-w", f"--width", help="resize output width; [pixels]", type
 parser.add_argument("-l", "--length", help="output video length; [sec]", type=float, default=math.inf)
 parser.add_argument("-s", "--start", help="start time. [sec]", type=float, default=0.0)
 parser.add_argument("-e", "--end", help="end time; [sec]", type=float, default=math.inf)
+parser.add_argument("--alpha", help="", type=float, default=1.0)
+parser.add_argument("--beta", help="", type=float, default=0.0)
 args = parser.parse_args()
 
 # open source video
@@ -54,6 +56,7 @@ while video.get(cv2.CAP_PROP_POS_MSEC) < end_msec and msec < length_msec:
     if not ret:
         break
 
+    frame = cv2.convertScaleAbs(frame, alpha=args.alpha, beta=args.beta)
     frame = cv2.resize(frame, size)
 
     output.write(frame)
