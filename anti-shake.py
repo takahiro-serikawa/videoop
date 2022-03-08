@@ -24,16 +24,16 @@ height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = int(video.get(cv2.CAP_PROP_FPS))
 
 scale = args.width / width
-osize = (args.width, round(height * scale))
+size = (args.width, round(height * scale))
 
 # create output video
 if args.output is None:
     root, ext = os.path.splitext(args.video)
     args.output = root+SUFFIX+ext
 fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
-output = cv2.VideoWriter(args.output, fourcc, fps, osize)
+output = cv2.VideoWriter(args.output, fourcc, fps, size)
 
-print(f"{args.video} ({width}, {height}) x{scale:.2f} -> {args.output} {osize}")
+print(f"{args.video} ({width}, {height}) x{scale:.2f} -> {args.output} {size}")
 
 r = int(args.tracking * max(width, height) / 100)
 print(f"tracking: {r} pixels")
@@ -58,7 +58,7 @@ for i in range(frames):
         # do adjust
         matrix = np.float32([[scale, 0, -dx*scale],
                              [0, scale, -dy*scale]])
-        frame = cv2.warpAffine(frame, matrix, osize)
+        frame = cv2.warpAffine(frame, matrix, size)
 
         # add frame to output video
         output.write(frame)
