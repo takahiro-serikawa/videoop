@@ -16,6 +16,7 @@ parser.add_argument("-o", "--output", help=f"output video; default video{SUFFIX}
 parser.add_argument("-w", "--width", help=f"output size; default {DEF_WIDTH}", type=int, default=DEF_WIDTH)
 parser.add_argument("-t", "--tracking", help=f"tracking range. default {DEF_TRACKING} [%%]", type=float, default=DEF_TRACKING)
 parser.add_argument("--select-roi", help="select ROI on image with mouse", action='store_true')
+parser.add_argument("-D", "--DEBUG", help="debug option", action='store_true')
 args = parser.parse_args()
 
 # open source video
@@ -37,6 +38,12 @@ output = cv2.VideoWriter(args.output, fourcc, fps, size)
 
 print(f"{args.video} ({width}, {height}) x{scale:.2f} -> {args.output} {size}")
 
+if args.DEBUG:
+    cv2.namedWindow("templ", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("frame", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("res", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+    w = 0
+
 perf0 = time.perf_counter()
 for i in range(frames):
     ret, frame = video.read()
@@ -54,6 +61,9 @@ for i in range(frames):
 
             templ = frame[ty:ty+th, tx:tx+tw]
 
+            if args.DEBUG:
+                cv2.imshow("templ", templ)
+
         # calculate daviation
         roi = frame[ty-r:ty+th+r, tx-r:tx+tw+r]
         res = cv2.matchTemplate(roi, templ, METHOD)
@@ -69,6 +79,22 @@ for i in range(frames):
 
         # add frame to output video
         output.write(frame)
+
+        if args.DEBUG:
+            res2 = cv2.convertScaleAbs(res, alpha=255.0/(1.0-0.8), beta=-255.0*0.8/(1.0-0.8))
+            res2 = cv2.applyColorMap(res2, cv2.COLORMAP_HOT)
+
+            cv2.imshow("res", res2)
+
+            cv2.imshow("frame", frame)
+
+            key = cv2.waitKey(w)
+            if key in [ord('q'), 27, 3]:    # quit on 'q', ESC, ^C
+                break
+            if key == ord('s'):             # toggle single step mode
+                w = 1-w
+            elif key == ord('d'):           # debug mode off
+                args.debug = False
 
 # finalize
 video.release()
