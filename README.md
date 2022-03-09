@@ -41,6 +41,37 @@ options:
 3. タイムスタンプ。現状ファイルのタイムスタンプを描画。EXIFから撮影日時を取得すべきでは？
 4. タイムスタンプフォーマット。省略時タイムスタンプ描画しないほうが良いかも。
 
+## 手振れ補正
+
+anti-shake.py
+
+動画の手振れを補正する。
+
+```
+usage: anti-shake.py [-h] [-o OUTPUT] [-w WIDTH] [-t TRACKING] [--select-roi] [-D] video
+
+movie shake stabilize
+
+positional arguments:
+  video                 入力動画
+
+options:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                       出力動画のファイル名。
+                       省略したとき、入力ファイル名の拡張子の前に -a を挿入
+  -w WIDTH, --width WIDTH
+                        出力する動画の解像度を指定。
+  --tracking TRACKING
+                        位置補正範囲 画像サイズに対するパーセント指定 
+  --select-roi          動画の最初の一コマを表示してマウスでテンプレートを指定
+  --DEBUG           デバッグ。
+```
+
+### 懸案事項
+1. 処理速度
+2. 画像によっては追従性に問題あり
+
 
 ## 動画編集
 
