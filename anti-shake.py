@@ -16,7 +16,7 @@ parser.add_argument("-o", "--output", help=f"output video; default video{SUFFIX}
 parser.add_argument("-w", "--width", help=f"output size; default {DEF_WIDTH}", type=int, default=DEF_WIDTH)
 parser.add_argument("-t", "--tracking", help=f"tracking range. default {DEF_TRACKING} [%%]", type=float, default=DEF_TRACKING)
 parser.add_argument("--select-roi", help="select ROI on image with mouse", action='store_true')
-parser.add_argument("-D", "--DEBUG", help="debug option", action='store_true')
+parser.add_argument("--DEBUG", help="debug option", action='store_true')
 args = parser.parse_args()
 
 # open source video
@@ -94,7 +94,7 @@ for i in range(frames):
             if key == ord('s'):             # toggle single step mode
                 w = 1-w
             elif key == ord('d'):           # debug mode off
-                args.debug = False
+                args.DEBUG = False
 
 # finalize
 video.release()
