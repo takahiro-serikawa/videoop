@@ -50,8 +50,8 @@ video-cut.py
 音声は失われる。
 
 ```
-usage: video-cut.py [-h] [-o OUTPUT] [-w WIDTH] [-l LENGTH] [-s START] [-e END] [-r FRAME_RATE] [--crop CROP] [--alpha ALPHA]
-                    [--beta BETA]
+usage: video-cut.py [-h] [-o OUTPUT] [-w WIDTH] [-l LENGTH] [-s START] [-e END] [-r FRAME_RATE]
+                    [--rotate ROTATE] [--crop CROP] [--alpha ALPHA] [--beta BETA]
                     video
 
 Edit the video. Change resolutioncut, out for specified time.
@@ -78,6 +78,7 @@ options:
                         整数値 [画素]
                         小数 入力動画の縦横それぞれに対する比率で指定
                         %指定
+  --rotate ROTATE       回転。角度を[度]で指定。
   --alpha ALPHA         各画素に指定係数をかける。
   --beta BETA           各画素にbetaを足す。
 ```

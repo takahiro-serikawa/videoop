@@ -4,6 +4,7 @@ import time
 import math
 import argparse
 import cv2
+import numpy as np
 
 SUFFIX = '-cut'
 
@@ -16,6 +17,7 @@ parser.add_argument("-s", "--start", help="start time. [sec]", type=float, defau
 parser.add_argument("-e", "--end", help="end time; [sec]", type=float, default=math.inf)
 parser.add_argument("-r", "--frame-rate", help="change frame rate", type=float)
 parser.add_argument("--crop", help="crop; x,y,width,height")
+parser.add_argument("--rotate", help="rotate angle; [deg]", type=float, default=0.0)
 parser.add_argument("--alpha", help="", type=float, default=1.0)
 parser.add_argument("--beta", help="", type=float, default=0.0)
 args = parser.parse_args()
@@ -73,6 +75,24 @@ start_msec = args.start * 1000
 end_msec = args.end * 1000
 length_msec = args.length * 1000
 
+# affine matrix
+cosT = math.cos(math.pi*args.rotate/180)
+sinT = math.sin(math.pi*args.rotate/180)
+m1 = np.array([[1, 0, -cx-cw/2], 		# centering
+               [0, 1, -cy-ch/2], 
+			   [0, 0, 1]])			
+m2 = np.array([[cosT,-sinT, 0],			# rotate
+               [sinT, cosT, 0],
+			   [0, 0, 1]])						
+m3 = np.array([[1, 0, cx+cw/2],			# un-centering
+               [0, 1, cy+ch/2], 
+			   [0, 0, 1]])				
+m4 = np.array([[scale, 0, -cx*scale], 	# crop
+               [0, scale, -cy*scale], 
+			   [0, 0, 1]])	
+m = m4 @ m3 @ m2 @ m1
+#print(m)
+
 perf0 = time.perf_counter()
 video.set(cv2.CAP_PROP_POS_MSEC, start_msec)
 msec = 0.0
@@ -81,9 +101,8 @@ while video.get(cv2.CAP_PROP_POS_MSEC) < end_msec and msec < length_msec:
     if not ret:
         break
 
-    frame = frame[cy:cy+ch, cx:cx+cw]
+    frame = cv2.warpAffine(frame, m[:-1], size)
     frame = cv2.convertScaleAbs(frame, alpha=args.alpha, beta=args.beta)
-    frame = cv2.resize(frame, size)
 
     output.write(frame)
     msec += 1000/fps
