@@ -50,6 +50,8 @@ perf0 = time.perf_counter()
 for i in range(frames):
     ret, frame = video.read()
     if ret:
+        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+
         # make template at first frame
         if i == 0:
             r = int(args.tracking * max(width, height) / 100)
@@ -61,13 +63,13 @@ for i in range(frames):
                 tx, ty = (r, r)
                 tw, th = (width-2*r, height-2*r)
 
-            templ = frame[ty:ty+th, tx:tx+tw]
+            templ = gray[ty:ty+th, tx:tx+tw]
 
             if args.DEBUG:
                 cv2.imshow("templ", templ)
 
         # calculate daviation
-        roi = frame[ty-r:ty+th+r, tx-r:tx+tw+r]
+        roi = gray[ty-r:ty+th+r, tx-r:tx+tw+r]
         res = cv2.matchTemplate(roi, templ, METHOD)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         dx = max_loc[0] - r
@@ -83,8 +85,9 @@ for i in range(frames):
         output.write(frame)
 
         if args.DEBUG:
-            res2 = cv2.convertScaleAbs(res, alpha=255.0/(1.0-0.8), beta=-255.0*0.8/(1.0-0.8))
-            res2 = cv2.applyColorMap(res2, cv2.COLORMAP_HOT)
+            #res2 = cv2.convertScaleAbs(res, alpha=255.0/(1.0-0.8), beta=-255.0*0.8/(1.0-0.8))
+            res2 = cv2.convertScaleAbs(res, alpha=255.0, beta=0.0)
+            res2 = cv2.applyColorMap(res2, cv2.COLORMAP_JET)
             cv2.imshow("res", res2)
 
             tt = np.float32([[tx, ty, 1], [tx+tw, ty+th, 1]])
