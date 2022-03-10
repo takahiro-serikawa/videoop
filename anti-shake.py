@@ -9,6 +9,8 @@ SUFFIX = '-a'
 DEF_WIDTH = 1280
 DEF_TRACKING = 20
 METHOD = cv2.TM_CCOEFF_NORMED
+TEMPL_COLOR = (0,255,0)
+MATCHED_COLOR = (0,0,255)
 
 parser = argparse.ArgumentParser(description=f"movie shake stabilize")
 parser.add_argument("video", help=f"source video")
@@ -83,9 +85,16 @@ for i in range(frames):
         if args.DEBUG:
             res2 = cv2.convertScaleAbs(res, alpha=255.0/(1.0-0.8), beta=-255.0*0.8/(1.0-0.8))
             res2 = cv2.applyColorMap(res2, cv2.COLORMAP_HOT)
-
             cv2.imshow("res", res2)
 
+            tt = np.float32([[tx, ty, 1], [tx+tw, ty+th, 1]])
+            mm = (tt @ matrix.T).astype(int)
+            cv2.rectangle(frame, tuple(mm[0]), tuple(mm[1]), MATCHED_COLOR, thickness=3)
+
+            matrix0 = np.float32([[scale, 0, 0],
+                                  [0, scale, 0]])
+            mm = (tt @ matrix0.T).astype(int)
+            cv2.rectangle(frame, tuple(mm[0]), tuple(mm[1]), TEMPL_COLOR, thickness=3)
             cv2.imshow("frame", frame)
 
             key = cv2.waitKey(w)
