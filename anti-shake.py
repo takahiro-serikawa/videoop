@@ -47,6 +47,7 @@ if args.DEBUG:
     w = 0
 
 perf0 = time.perf_counter()
+dx, dy = (0, 0)
 for i in range(frames):
     ret, frame = video.read()
     if ret:
@@ -55,6 +56,7 @@ for i in range(frames):
         # make template at first frame
         if i == 0:
             r = int(args.tracking * max(width, height) / 100)
+            q = r//10
             print(f"tracking: {r} pixels")
             if args.select_roi:
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
@@ -69,11 +71,12 @@ for i in range(frames):
                 cv2.imshow("templ", templ)
 
         # calculate daviation
-        roi = gray[ty-r:ty+th+r, tx-r:tx+tw+r]
+        sx, sy = (tx+dx, ty+dy) # serach origin
+        roi = gray[sy-q:sy+th+q, sx-q:sx+tw+q]
         res = cv2.matchTemplate(roi, templ, METHOD)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        dx = max_loc[0] - r
-        dy = max_loc[1] - r
+        dx += max_loc[0] - q
+        dy += max_loc[1] - q
         print(f"{i:5}/{frames}:{100*max_val:6.2f}% ({dx:+5},{dy:+5})", end='\r')
 
         # do adjust
