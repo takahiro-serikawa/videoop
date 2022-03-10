@@ -57,7 +57,7 @@ for i in range(frames):
         if i == 0:
             r = int(args.tracking * max(width, height) / 100)
             q = r//10
-            print(f"tracking: {r} pixels")
+            print(f"tracking: {r} ({q}) pixels")
             if args.select_roi:
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
                 tx, ty, tw, th = cv2.selectROI("matched", frame)
@@ -70,6 +70,8 @@ for i in range(frames):
             if args.DEBUG:
                 cv2.imshow("templ", templ)
 
+                res1 = np.zeros((2*r+1, 2*r+1, 3), np.uint8)
+
         # calculate daviation
         sx, sy = (tx+dx, ty+dy) # serach origin
         roi = gray[sy-q:sy+th+q, sx-q:sx+tw+q]
@@ -77,7 +79,7 @@ for i in range(frames):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         dx += max_loc[0] - q
         dy += max_loc[1] - q
-        print(f"{i:5}/{frames}:{100*max_val:6.2f}% ({dx:+5},{dy:+5})", end='\r')
+        print(f"{i:5}/{frames}:{100*max_val:6.2f}% ({dx:+5},{dy:+5}) {max_loc[0]-q:+3},{max_loc[1]-q:+3}", end='\r')
 
         # do adjust
         matrix = np.float32([[scale, 0, -dx*scale],
@@ -91,8 +93,12 @@ for i in range(frames):
             #res2 = cv2.convertScaleAbs(res, alpha=255.0/(1.0-0.8), beta=-255.0*0.8/(1.0-0.8))
             res2 = cv2.convertScaleAbs(res, alpha=255.0, beta=0.0)
             res2 = cv2.applyColorMap(res2, cv2.COLORMAP_JET)
-            cv2.imshow("res", res2)
+            #cv2.imshow("res", res2)
 
+            res1[:] = 255
+            res1[sy:sy+2*q+1, sx:sx+2*q+1] = res2
+            cv2.imshow("res", res1)
+ 
             tt = np.float32([[tx, ty, 1], [tx+tw, ty+th, 1]])
             mm = (tt @ matrix.T).astype(int)
             cv2.rectangle(frame, tuple(mm[0]), tuple(mm[1]), MATCHED_COLOR, thickness=3)
