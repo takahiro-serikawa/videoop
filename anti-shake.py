@@ -73,6 +73,10 @@ for i in range(frames):
                 res1 = np.zeros((2*r+1, 2*r+1, 3), np.uint8)
 
         # calculate daviation
+        if tx+dx < q:
+            dx = q-tx
+        if ty+dy < q:
+            dy = q-ty
         sx, sy = (tx+dx, ty+dy) # serach origin
         roi = gray[sy-q:sy+th+q, sx-q:sx+tw+q]
         res = cv2.matchTemplate(roi, templ, METHOD)
