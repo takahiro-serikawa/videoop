@@ -19,6 +19,7 @@ parser.add_argument("-w", "--width", help=f"output size; default {DEF_WIDTH}", t
 parser.add_argument("-t", "--tracking", help=f"tracking range. default {DEF_TRACKING} [%%]", type=float, default=DEF_TRACKING)
 parser.add_argument("--select-roi", help="select ROI on image with mouse", action='store_true')
 parser.add_argument("--DEBUG", help="debug option", action='store_true')
+parser.add_argument("--auto-mask", help="debug option", action='store_true')
 args = parser.parse_args()
 
 # open source video
@@ -42,12 +43,14 @@ print(f"{args.video} ({width}, {height}) x{scale:.2f} -> {args.output} {size}")
 
 if args.DEBUG:
     cv2.namedWindow("templ", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("mask", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("frame", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("res", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
     w = 0
 
 perf0 = time.perf_counter()
 dx, dy = (0, 0)
+mask = None
 for i in range(frames):
     ret, frame = video.read()
     if ret:
@@ -66,9 +69,11 @@ for i in range(frames):
                 tw, th = (width-2*r, height-2*r)
 
             templ = gray[ty:ty+th, tx:tx+tw]
+            mask = np.ones((th, tw), dtype=np.float32)
 
             if args.DEBUG:
                 cv2.imshow("templ", templ)
+                cv2.imshow("mask", mask)
 
                 res1 = np.zeros((2*r+1, 2*r+1, 3), np.uint8)
 
@@ -79,7 +84,10 @@ for i in range(frames):
             dy = q-ty
         sx, sy = (tx+dx, ty+dy) # serach origin
         roi = gray[sy-q:sy+th+q, sx-q:sx+tw+q]
-        res = cv2.matchTemplate(roi, templ, METHOD)
+        if args.auto_mask:
+            res = cv2.matchTemplate(roi, templ, METHOD, mask=mask)
+        else:
+            res = cv2.matchTemplate(roi, templ, METHOD)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         dx += max_loc[0] - q
         dy += max_loc[1] - q
@@ -93,7 +101,18 @@ for i in range(frames):
         # add frame to output video
         output.write(frame)
 
+        if args.auto_mask:
+            mask = gray[ty+dy:ty+dy+th, tx+dx:tx+dx+tw]
+            mask = cv2.absdiff(templ, mask)
+            ret, mask = cv2.threshold(mask, 25 , 255, cv2.THRESH_BINARY)
+            mask = cv2.bitwise_not(mask)
+
+            kernel = np.ones((3, 3), np.uint8)
+            mask = cv2.erode(mask, kernel, iterations=1)
+
         if args.DEBUG:
+            if args.auto_mask: cv2.imshow("mask", mask)
+            
             #res2 = cv2.convertScaleAbs(res, alpha=255.0/(1.0-0.8), beta=-255.0*0.8/(1.0-0.8))
             res2 = cv2.convertScaleAbs(res, alpha=255.0, beta=0.0)
             res2 = cv2.applyColorMap(res2, cv2.COLORMAP_JET)
@@ -112,6 +131,7 @@ for i in range(frames):
             mm = (tt @ matrix0.T).astype(int)
             cv2.rectangle(frame, tuple(mm[0]), tuple(mm[1]), TEMPL_COLOR, thickness=3)
             cv2.imshow("frame", frame)
+
 
             key = cv2.waitKey(w)
             if key in [ord('q'), 27, 3]:    # quit on 'q', ESC, ^C
