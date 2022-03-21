@@ -7,10 +7,10 @@ python3, 要 cv2(opencv), numpy
 
 time-lapse.py
 
-複数の静止画像からタイムラプス動画を生成する。
+インターバル撮影された、複数の静止画像からタイムラプス動画を生成する。
 
 ```
-usage: time-lapse.py [-h] [-o OUTPUT] [-w WIDTH] [-r FRAME_RATE] [-t TIMESTAMP] files [files ...]
+usage: time-lapse.py [-h] [-o OUTPUT] [-w WIDTH] [-r FRAME_RATE] [-t TIMESTAMP] [--flash-adjust] files [files ...]
 
 make time-lapse video from image files
 
@@ -33,6 +33,7 @@ options:
                         動画右下にタイムスタンプを描画するときのフォーマット指定。
                         省略時 yyyy-mm-dd hh:mm AM/PM
                         タイムスタンプを描画したくないときは -t ' ' などとする。
+  --flash-adjust        フラッシュ使用時のフレームごとの光量のばらつきを均一化してちらつきを軽減する。
 ```
 
 ### 懸案事項
