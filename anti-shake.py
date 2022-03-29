@@ -18,6 +18,7 @@ parser.add_argument("-o", "--output", help=f"output video; default video{SUFFIX}
 parser.add_argument("-w", "--width", help=f"output size; default {DEF_WIDTH}", type=int, default=DEF_WIDTH)
 parser.add_argument("-t", "--tracking", help=f"tracking range. default {DEF_TRACKING} [%%]", type=float, default=DEF_TRACKING)
 parser.add_argument("--select-roi", help="select ROI on image with mouse", action='store_true')
+parser.add_argument("--equalize-hist", help="", action='store_true')
 parser.add_argument("--DEBUG", help="debug option", action='store_true')
 args = parser.parse_args()
 
@@ -52,6 +53,8 @@ for i in range(frames):
     ret, frame = video.read()
     if ret:
         gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        if args.equalize_hist:
+            gray = cv2.equalizeHist(gray)
 
         # make template at first frame
         if i == 0:
