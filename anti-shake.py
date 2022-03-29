@@ -60,7 +60,7 @@ for i in range(frames):
             print(f"tracking: {r} ({q}) pixels")
             if args.select_roi:
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
-                tx, ty, tw, th = cv2.selectROI("matched", frame)
+                tx, ty, tw, th = cv2.selectROI("frame", frame)
             else:
                 tx, ty = (r, r)
                 tw, th = (width-2*r, height-2*r)
@@ -94,15 +94,13 @@ for i in range(frames):
         output.write(frame)
 
         if args.DEBUG:
-            #res2 = cv2.convertScaleAbs(res, alpha=255.0/(1.0-0.8), beta=-255.0*0.8/(1.0-0.8))
             res2 = cv2.convertScaleAbs(res, alpha=255.0, beta=0.0)
             res2 = cv2.applyColorMap(res2, cv2.COLORMAP_JET)
-            #cv2.imshow("res", res2)
 
-            res1[:] = 255
-            res1[sy:sy+2*q+1, sx:sx+2*q+1] = res2
+            #res1[:] = 255
+            res1[r+dy:r+dy+2*q+1, r+dx:r+dx+2*q+1] = res2
             cv2.imshow("res", res1)
- 
+
             tt = np.float32([[tx, ty, 1], [tx+tw, ty+th, 1]])
             mm = (tt @ matrix.T).astype(int)
             cv2.rectangle(frame, tuple(mm[0]), tuple(mm[1]), MATCHED_COLOR, thickness=3)
