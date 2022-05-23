@@ -63,7 +63,7 @@ for i in range(frames):
             print(f"tracking: {r} ({q}) pixels")
             if args.select_roi:
                 cv2.namedWindow("frame", cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
-                tx, ty, tw, th = cv2.selectROI("matched", frame)
+                tx, ty, tw, th = cv2.selectROI("frame", frame)
             else:
                 tx, ty = (r, r)
                 tw, th = (width-2*r, height-2*r)
@@ -118,7 +118,7 @@ for i in range(frames):
             res2 = cv2.applyColorMap(res2, cv2.COLORMAP_JET)
             #cv2.imshow("res", res2)
 
-            res1[:] = 255
+            #res1[:] = 255
             res1[sy:sy+2*q+1, sx:sx+2*q+1] = res2
             cv2.imshow("res", res1)
  

@@ -19,6 +19,7 @@ parser.add_argument("-r", "--frame-rate", help=f"change frame rate", type=float)
 parser.add_argument("--crop", help=f"crop; x,y,width,height")
 parser.add_argument("--alpha", help=f"", type=float, default=1.0)
 parser.add_argument("--beta", help=f"", type=float, default=0.0)
+parser.add_argument("--rotate", help=f"", type=float, default=0.0)
 args = parser.parse_args()
 
 # open source video
